@@ -4,7 +4,7 @@ import com.swipeit.app.domain.model.Photo
 
 fun MediaImage.toPhoto(): Photo = Photo(
     id = id,
-    uri = contentUri.toString(),
+    uri = contentUri,
     name = displayName,
     sizeBytes = sizeBytes,
     dateTaken = dateTakenMillis,

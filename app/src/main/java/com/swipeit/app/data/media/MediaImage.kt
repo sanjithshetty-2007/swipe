@@ -1,11 +1,9 @@
 package com.swipeit.app.data.media
 
-import android.net.Uri
-
 /** Raw image row read from MediaStore. */
 data class MediaImage(
     val id: Long,
-    val contentUri: Uri,
+    val contentUri: String,
     val displayName: String,
     val sizeBytes: Long,
     val dateTakenMillis: Long,

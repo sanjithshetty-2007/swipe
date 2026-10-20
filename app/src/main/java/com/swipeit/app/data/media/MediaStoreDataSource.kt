@@ -2,10 +2,13 @@ package com.swipeit.app.data.media
 
 import android.content.ContentUris
 import android.content.Context
+import android.content.pm.PackageManager
 import android.database.Cursor
 import android.provider.MediaStore
 import android.util.Log
+import androidx.core.content.ContextCompat
 import com.swipeit.app.core.common.IoDispatcher
+import com.swipeit.app.core.permissions.PhotoPermissions
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ensureActive
@@ -25,24 +28,31 @@ class MediaStoreDataSource @Inject constructor(
 ) {
 
     /**
-     * Returns all images visible to the app (all, or only user-selected under partial access).
-     * Returns an empty list if read access was revoked (SecurityException is logged).
+     * Returns all images visible to the app (all, or only user-selected under partial access),
+     * or null if MediaStore could not be read (no permission, or provider unavailable).
      */
-    suspend fun queryImages(sortOrder: MediaSortOrder = MediaSortOrder.NEWEST_FIRST): List<MediaImage> =
+    suspend fun queryImages(sortOrder: MediaSortOrder = MediaSortOrder.NEWEST_FIRST): List<MediaImage>? =
         withContext(ioDispatcher) {
             try {
-                context.contentResolver.query(
+                val cursor = context.contentResolver.query(
                     MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                     PROJECTION,
                     null,
                     null,
                     sortOrder.sql,
-                )?.use { cursor -> readAll(cursor) }.orEmpty()
+                )
+                if (cursor == null) Log.w(TAG, "MediaStore returned a null cursor")
+                cursor?.use { readAll(it) }
             } catch (e: SecurityException) {
                 Log.w(TAG, "No permission to read MediaStore images", e)
-                emptyList()
+                null
             }
         }
+
+    /** True when the app can see the whole library (not just user-selected photos). */
+    fun hasFullAccess(): Boolean =
+        ContextCompat.checkSelfPermission(context, PhotoPermissions.fullAccess()) ==
+            PackageManager.PERMISSION_GRANTED
 
     private suspend fun readAll(cursor: Cursor): List<MediaImage> {
         val idCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
@@ -62,7 +72,7 @@ class MediaStoreDataSource @Inject constructor(
             val dateTaken = cursor.getLongOrZero(takenCol)
             images += MediaImage(
                 id = id,
-                contentUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id),
+                contentUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id).toString(),
                 displayName = cursor.getStringOrEmpty(nameCol),
                 sizeBytes = cursor.getLongOrZero(sizeCol),
                 dateTakenMillis = if (dateTaken > 0) dateTaken else cursor.getLongOrZero(addedCol) * SECONDS_TO_MILLIS,
