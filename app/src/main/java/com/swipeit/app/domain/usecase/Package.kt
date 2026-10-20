@@ -1,0 +1,3 @@
+package com.swipeit.app.domain.usecase
+
+// KeepPhoto, TrashPhoto, UndoLast, RestorePhoto, EmptyTrash, ...
