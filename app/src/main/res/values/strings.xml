@@ -37,6 +37,13 @@
         <item quantity="other">%1$d of %2$d sorted</item>
     </plurals>
 
+    <string name="action_undo">Undo last decision</string>
+    <string name="swipe_stamp_keep">KEEP!</string>
+    <string name="swipe_stamp_trash">TRASH</string>
+    <string name="sort_error_save">Couldn\'t save that decision. Please try again.</string>
+    <string name="sort_error_undo">Couldn\'t undo. Please try again.</string>
+    <string name="sort_nothing_to_undo">Nothing to undo</string>
+
     <string name="sort_loading">Looking for photos…</string>
     <string name="sort_empty_title">All sorted!</string>
     <string name="sort_empty_message">No unsorted photos left. New photos will show up here automatically.</string>

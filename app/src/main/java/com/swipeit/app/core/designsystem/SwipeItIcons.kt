@@ -12,4 +12,5 @@ object SwipeItIcons {
     val Expand = R.drawable.ic_expand
     val Settings = R.drawable.ic_settings
     val Photos = R.drawable.ic_photo_library
+    val Undo = R.drawable.ic_undo
 }

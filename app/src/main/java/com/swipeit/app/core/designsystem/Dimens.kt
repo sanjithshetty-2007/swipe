@@ -36,4 +36,14 @@ object SwipeItDimens {
     val OverlayFadeHeight = 72.dp
     val EmptyStateIconSize = 72.dp
     val EmptyStateMaxTextWidth = 320.dp
+
+    val StackOffsetStep = 14.dp
+    val StackHorizontalInset = 8.dp
+    val StampBorderWidth = 3.dp
+    val StampPadding = 10.dp
+    val StampIconSize = 28.dp
+    val StampInset = 24.dp
+    const val StackDimStep = 0.18f
+    const val SwipeTintMaxAlpha = 0.35f
+    const val StampRotationDegrees = 12f
 }
