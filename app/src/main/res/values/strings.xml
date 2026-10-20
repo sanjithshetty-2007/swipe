@@ -1,3 +1,19 @@
 <resources>
     <string name="app_name">SwipeIt</string>
+
+    <string name="onboarding_tagline">Clean your gallery, one swipe at a time.</string>
+    <string name="onboarding_hint_trash">Swipe left to send a photo to Trash.</string>
+    <string name="onboarding_hint_keep">Swipe right or up to keep it.</string>
+    <string name="onboarding_hint_offline">Offline. No internet. Just you.</string>
+
+    <string name="permission_allow">Allow photo access</string>
+    <string name="permission_denied_message">SwipeIt needs access to your photos to sort them. Nothing ever leaves your phone.</string>
+    <string name="permission_permanently_denied_title">Photo access is turned off</string>
+    <string name="permission_permanently_denied_message">Open settings, tap Permissions, and allow Photos to start sorting.</string>
+    <string name="permission_open_settings">Open settings</string>
+    <string name="permission_partial_message">SwipeIt can only see some photos</string>
+    <string name="permission_select_more">Select more</string>
+    <string name="permission_allow_all">Allow all</string>
+
+    <string name="home_placeholder">Home</string>
 </resources>
