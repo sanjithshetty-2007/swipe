@@ -15,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -52,9 +53,21 @@ fun SortContent(
     val scope = rememberCoroutineScope()
     val topPhoto = uiState.queue.firstOrNull()
     // New state per top photo: a fresh card never inherits the previous card's offset.
-    val topCardState = remember(topPhoto?.id) { SwipeCardState() }
+    // An undone photo starts off screen and flies back in from the side it left.
+    val returning = uiState.returningCard
+    val topCardState = remember(topPhoto?.id) {
+        SwipeCardState().apply {
+            if (returning != null && returning.photoId == topPhoto?.id) prepareEntry(returning.direction)
+        }
+    }
+    LaunchedEffect(topCardState) {
+        if (topCardState.pendingEntry != null) {
+            topCardState.playEntry()
+            onEvent(SortUiEvent.ReturnAnimationFinished)
+        }
+    }
     val onSwiped: (Photo, SwipeDirection) -> Unit = { photo, direction ->
-        onEvent(if (direction.isKeep) SortUiEvent.Keep(photo) else SortUiEvent.Trash(photo))
+        onEvent(if (direction.isKeep) SortUiEvent.Keep(photo, direction) else SortUiEvent.Trash(photo))
     }
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -75,6 +88,7 @@ fun SortContent(
             if (uiState.total > 0) {
                 ProgressHeaderCard(remaining = uiState.remaining, total = uiState.total)
             }
+            RecentStrip(items = uiState.recent, onItemClick = onOpenPreview)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -171,7 +185,13 @@ private fun SortContentPreview(uiState: SortUiState, isPartialAccess: Boolean = 
 @Composable
 private fun SortDeckPreview() {
     SortContentPreview(
-        SortUiState(queue = previewPhotos.toImmutableList(), remaining = 342, total = 1_200, isLoading = false),
+        SortUiState(
+            queue = previewPhotos.toImmutableList(),
+            remaining = 342,
+            total = 1_200,
+            isLoading = false,
+            recent = previewRecent.toImmutableList(),
+        ),
     )
 }
 

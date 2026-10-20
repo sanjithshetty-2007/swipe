@@ -6,10 +6,12 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.Velocity
 import com.swipeit.app.core.designsystem.SwipeItMotion
+import kotlinx.coroutines.flow.first
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -76,15 +78,45 @@ class SwipeCardState(initialOffset: Offset = Offset.Zero) {
     suspend fun animateOut(direction: SwipeDirection): Boolean {
         if (isLeaving) return false
         isLeaving = true
+        offsetAnimatable.animateTo(offscreen(direction, from = offset), SwipeItMotion.cardFlyOut())
+        return true
+    }
+
+    /** Set when this card is an undone photo that should fly back in from where it left. */
+    var pendingEntry: SwipeDirection? by mutableStateOf(null)
+        private set
+
+    private var entryStarted by mutableStateOf(false)
+
+    /** Keeps the card invisible until [playEntry] has moved it off screen (avoids a centre flash). */
+    val isHiddenForEntry: Boolean get() = pendingEntry != null && !entryStarted
+
+    fun prepareEntry(direction: SwipeDirection) {
+        pendingEntry = direction
+    }
+
+    /** Reverse of [animateOut]: waits for layout, jumps off screen, springs back to centre. */
+    suspend fun playEntry() {
+        val direction = pendingEntry ?: return
+        try {
+            snapshotFlow { size }.first { it != IntSize.Zero }
+            offsetAnimatable.snapTo(offscreen(direction, from = Offset.Zero))
+            entryStarted = true
+            offsetAnimatable.animateTo(Offset.Zero, SwipeItMotion.cardSnapBack())
+        } finally {
+            entryStarted = true
+            pendingEntry = null
+        }
+    }
+
+    private fun offscreen(direction: SwipeDirection, from: Offset): Offset {
         val travelX = size.width * SwipeItMotion.FlyOutDistanceFactor
         val travelY = size.height * SwipeItMotion.FlyOutDistanceFactor
-        val target = when (direction) {
-            SwipeDirection.LEFT -> Offset(-travelX, offset.y)
-            SwipeDirection.RIGHT -> Offset(travelX, offset.y)
-            SwipeDirection.UP -> Offset(offset.x, -travelY)
+        return when (direction) {
+            SwipeDirection.LEFT -> Offset(-travelX, from.y)
+            SwipeDirection.RIGHT -> Offset(travelX, from.y)
+            SwipeDirection.UP -> Offset(from.x, -travelY)
         }
-        offsetAnimatable.animateTo(target, SwipeItMotion.cardFlyOut())
-        return true
     }
 
     suspend fun snapBack() {

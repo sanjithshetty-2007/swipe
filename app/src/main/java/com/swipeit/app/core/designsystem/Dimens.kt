@@ -46,4 +46,18 @@ object SwipeItDimens {
     const val StackDimStep = 0.18f
     const val SwipeTintMaxAlpha = 0.35f
     const val StampRotationDegrees = 12f
+
+    val RecentThumbWidth = 44.dp
+    val RecentThumbHeight = 58.dp
+    val RecentThumbOverlap = 12.dp
+    val RecentThumbCorner = 10.dp
+    val RecentStripHeight = 72.dp
+    val RecentBadgeSize = 18.dp
+    val RecentBadgeIconSize = 11.dp
+    val RecentSlideDistance = 56.dp
+    val RecentFallDistance = 28.dp
+
+    val PreviewThumbSize = 52.dp
+    val PreviewThumbSelectedBorder = 2.dp
+    val ChipHeight = 28.dp
 }

@@ -82,6 +82,7 @@ fun SwipeCard(
                 translationY = animatedDepth * stackOffsetPx + (state?.offset?.y ?: 0f)
                 rotationZ = stackRotation(animatedDepth) + (state?.rotationDegrees ?: 0f)
                 transformOrigin = CardPivot
+                alpha = if (state?.isHiddenForEntry == true) 0f else 1f
                 this.shape = shape
                 clip = true
             },

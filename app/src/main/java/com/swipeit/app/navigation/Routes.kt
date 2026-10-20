@@ -12,7 +12,4 @@ data object TrashRoute
 data object KeptRoute
 
 @Serializable
-data class PreviewRoute(val photoId: Long)
-
-@Serializable
 data object SettingsRoute

@@ -54,8 +54,22 @@
     <string name="kept_title">Kept</string>
     <string name="kept_placeholder_message">Photos you swipe right or up will appear here.</string>
 
+    <string name="sort_recent_label">Recent</string>
+    <string name="sort_recent_item">%1$s, %2$s</string>
+    <string name="sort_moved_to_trash">Moved to Trash</string>
+    <string name="sort_undo_action">UNDO</string>
+
     <string name="preview_title">Preview</string>
-    <string name="preview_placeholder_message">Full-screen preview of photo %1$d is coming soon.</string>
+    <string name="preview_title_recent">%1$d of %2$d (recent)</string>
+    <string name="preview_close">Close</string>
+    <string name="preview_more_options">More options</string>
+    <string name="preview_reset_unsorted">Reset to unsorted</string>
+    <string name="preview_not_found_title">Photo not available</string>
+    <string name="preview_not_found_message">This photo is no longer on your device.</string>
+    <string name="preview_error_save">Couldn\'t update that photo. Please try again.</string>
+    <string name="decision_kept">Kept</string>
+    <string name="decision_trashed">In Trash</string>
+    <string name="decision_unsorted">Unsorted</string>
 
     <string name="settings_title">Settings</string>
     <string name="settings_placeholder_message">Settings are coming soon.</string>

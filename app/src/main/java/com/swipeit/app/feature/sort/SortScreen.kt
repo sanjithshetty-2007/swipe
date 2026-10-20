@@ -1,6 +1,8 @@
 package com.swipeit.app.feature.sort
 
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -12,6 +14,8 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.swipeit.app.R
+import kotlinx.coroutines.launch
 
 @Composable
 fun SortScreen(
@@ -29,8 +33,20 @@ fun SortScreen(
 
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
-            when (effect) {
-                is SortEffect.ShowMessage -> snackbarHostState.showSnackbar(resources.getString(effect.messageRes))
+            // Newest message wins; never queue a stale "UNDO" behind newer swipes.
+            snackbarHostState.currentSnackbarData?.dismiss()
+            launch {
+                when (effect) {
+                    is SortEffect.ShowMessage -> snackbarHostState.showSnackbar(resources.getString(effect.messageRes))
+                    SortEffect.TrashedWithUndo -> {
+                        val result = snackbarHostState.showSnackbar(
+                            message = resources.getString(R.string.sort_moved_to_trash),
+                            actionLabel = resources.getString(R.string.sort_undo_action),
+                            duration = SnackbarDuration.Short,
+                        )
+                        if (result == SnackbarResult.ActionPerformed) viewModel.onEvent(SortUiEvent.Undo)
+                    }
+                }
             }
         }
     }
@@ -46,7 +62,13 @@ fun SortScreen(
         uiState = uiState,
         isPartialAccess = isPartialAccess,
         snackbarHostState = snackbarHostState,
-        onEvent = viewModel::onEvent,
+        onEvent = { event ->
+            // A later keep or undo makes the "Moved to Trash · UNDO" offer stale.
+            if (event is SortUiEvent.Keep || event is SortUiEvent.Undo) {
+                snackbarHostState.currentSnackbarData?.dismiss()
+            }
+            viewModel.onEvent(event)
+        },
         onSelectMoreClick = onSelectMoreClick,
         onAllowAllClick = onAllowAllClick,
         onSettingsClick = onSettingsClick,

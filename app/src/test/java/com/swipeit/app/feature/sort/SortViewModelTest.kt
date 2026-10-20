@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.swipeit.app.R
 import com.swipeit.app.domain.model.Photo
 import com.swipeit.app.domain.usecase.KeepPhotoUseCase
+import com.swipeit.app.domain.usecase.ObserveRecentDecisionsUseCase
 import com.swipeit.app.domain.usecase.ObserveSortQueueUseCase
 import com.swipeit.app.domain.usecase.ObserveStatsUseCase
 import com.swipeit.app.domain.usecase.RefreshPhotosUseCase
@@ -33,6 +34,7 @@ class SortViewModelTest {
     private fun viewModel() = SortViewModel(
         observeSortQueue = ObserveSortQueueUseCase(repository),
         observeStats = ObserveStatsUseCase(repository),
+        observeRecentDecisions = ObserveRecentDecisionsUseCase(repository),
         keepPhoto = KeepPhotoUseCase(repository),
         trashPhoto = TrashPhotoUseCase(repository),
         undoLastDecision = UndoLastDecisionUseCase(repository),
@@ -111,9 +113,50 @@ class SortViewModelTest {
         vm.effects.test {
             vm.onEvent(SortUiEvent.Trash(photos[0]))
 
+            assertEquals(SortEffect.TrashedWithUndo, awaitItem())
             assertEquals(SortEffect.ShowMessage(R.string.sort_error_save), awaitItem())
         }
         assertEquals(listOf(1L, 2L, 3L), vm.uiState.value.ids())
+    }
+
+    @Test
+    fun trash_offersUndoSnackbar_keepDoesNot() = runTest(mainDispatcherRule.dispatcher) {
+        val vm = viewModel()
+        backgroundScope.launch { vm.uiState.collect { } }
+
+        vm.effects.test {
+            vm.onEvent(SortUiEvent.Keep(photos[0]))
+            expectNoEvents()
+
+            vm.onEvent(SortUiEvent.Trash(photos[1]))
+            assertEquals(SortEffect.TrashedWithUndo, awaitItem())
+        }
+    }
+
+    @Test
+    fun undo_announcesReturnFromTheSideTheCardLeft() = runTest(mainDispatcherRule.dispatcher) {
+        val vm = viewModel()
+        backgroundScope.launch { vm.uiState.collect { } }
+        vm.onEvent(SortUiEvent.Keep(photos[0], SwipeDirection.UP))
+
+        vm.onEvent(SortUiEvent.Undo)
+
+        assertEquals(ReturningCard(photoId = 1L, direction = SwipeDirection.UP), vm.uiState.value.returningCard)
+        assertEquals(1L, vm.uiState.value.queue.first().id)
+
+        vm.onEvent(SortUiEvent.ReturnAnimationFinished)
+        assertEquals(null, vm.uiState.value.returningCard)
+    }
+
+    @Test
+    fun recent_isOldestFirst() = runTest(mainDispatcherRule.dispatcher) {
+        val vm = viewModel()
+        backgroundScope.launch { vm.uiState.collect { } }
+
+        vm.onEvent(SortUiEvent.Keep(photos[0]))
+        vm.onEvent(SortUiEvent.Trash(photos[1]))
+
+        assertEquals(listOf(1L, 2L), vm.uiState.value.recent.map { it.photo.id })
     }
 
     @Test

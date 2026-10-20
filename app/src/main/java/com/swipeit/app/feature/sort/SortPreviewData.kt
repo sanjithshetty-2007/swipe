@@ -1,5 +1,7 @@
 package com.swipeit.app.feature.sort
 
+import com.swipeit.app.domain.model.DecidedPhoto
+import com.swipeit.app.domain.model.Decision
 import com.swipeit.app.domain.model.Photo
 
 /** Fake photos for @Preview only. */
@@ -13,5 +15,14 @@ internal val previewPhotos: List<Photo> = List(3) { index ->
         album = "Camera",
         width = 3000,
         height = 4000,
+    )
+}
+
+/** Fake recent decisions (oldest first) for @Preview only. */
+internal val previewRecent: List<DecidedPhoto> = List(4) { index ->
+    DecidedPhoto(
+        photo = previewPhotos[index % previewPhotos.size].copy(id = index + 100L),
+        decision = if (index % 2 == 0) Decision.KEPT else Decision.TRASHED,
+        decidedAt = index.toLong(),
     )
 }

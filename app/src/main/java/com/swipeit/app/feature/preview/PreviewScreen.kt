@@ -1,53 +1,38 @@
 package com.swipeit.app.feature.preview
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
-import com.swipeit.app.R
-import com.swipeit.app.core.designsystem.SwipeItIcons
-import com.swipeit.app.core.designsystem.SwipeItTheme
-import com.swipeit.app.core.designsystem.component.EmptyState
-import com.swipeit.app.core.designsystem.component.SwipeItTopBar
+import androidx.compose.ui.platform.LocalResources
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
-/** Placeholder until the zoomable preview is built. */
 @Composable
 fun PreviewScreen(
-    photoId: Long,
-    onBackClick: () -> Unit,
+    onCloseClick: () -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: PreviewViewModel = hiltViewModel(),
 ) {
-    PreviewContent(photoId = photoId, onBackClick = onBackClick, modifier = modifier)
-}
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val resources = LocalResources.current
 
-@Composable
-fun PreviewContent(
-    photoId: Long,
-    onBackClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier = modifier.fillMaxSize()) {
-        SwipeItTopBar(title = stringResource(R.string.preview_title), onBackClick = onBackClick)
-        EmptyState(
-            iconRes = SwipeItIcons.Expand,
-            title = stringResource(R.string.preview_title),
-            message = stringResource(R.string.preview_placeholder_message, photoId),
-        )
+    LaunchedEffect(viewModel) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                is PreviewEffect.ShowMessage -> snackbarHostState.showSnackbar(resources.getString(effect.messageRes))
+            }
+        }
     }
-}
 
-@Preview(showSystemUi = true)
-@Composable
-private fun PreviewContentPreview() {
-    SwipeItTheme {
-        PreviewContent(
-            photoId = 42L,
-            onBackClick = {},
-            modifier = Modifier.background(MaterialTheme.colorScheme.background),
-        )
-    }
+    PreviewContent(
+        uiState = uiState,
+        snackbarHostState = snackbarHostState,
+        onEvent = viewModel::onEvent,
+        onCloseClick = onCloseClick,
+        modifier = modifier,
+    )
 }

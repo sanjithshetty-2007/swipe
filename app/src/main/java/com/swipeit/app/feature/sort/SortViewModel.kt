@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.swipeit.app.R
 import com.swipeit.app.domain.model.Photo
 import com.swipeit.app.domain.usecase.KeepPhotoUseCase
+import com.swipeit.app.domain.usecase.ObserveRecentDecisionsUseCase
 import com.swipeit.app.domain.usecase.ObserveSortQueueUseCase
 import com.swipeit.app.domain.usecase.ObserveStatsUseCase
 import com.swipeit.app.domain.usecase.RefreshPhotosUseCase
@@ -41,6 +42,7 @@ private const val STOP_TIMEOUT_MILLIS = 5_000L
 class SortViewModel @Inject constructor(
     observeSortQueue: ObserveSortQueueUseCase,
     observeStats: ObserveStatsUseCase,
+    observeRecentDecisions: ObserveRecentDecisionsUseCase,
     private val keepPhoto: KeepPhotoUseCase,
     private val trashPhoto: TrashPhotoUseCase,
     private val undoLastDecision: UndoLastDecisionUseCase,
@@ -49,7 +51,11 @@ class SortViewModel @Inject constructor(
 
     /** Decided in the UI but possibly not yet gone from the repository queue. */
     private val pendingIds = MutableStateFlow<Set<Long>>(emptySet())
+    private val returningCard = MutableStateFlow<ReturningCard?>(null)
     private val writeMutex = Mutex()
+
+    /** Swipes written by this screen, newest last; tells undo which way the card left. Guarded by [writeMutex]. */
+    private val swipeHistory = ArrayDeque<ReturningCard>()
 
     private val effectChannel = Channel<SortEffect>(Channel.BUFFERED)
     val effects: Flow<SortEffect> = effectChannel.receiveAsFlow()
@@ -61,31 +67,42 @@ class SortViewModel @Inject constructor(
     }
 
     val uiState: StateFlow<SortUiState> =
-        combine(queue, observeStats(), pendingIds) { photos, stats, pending ->
+        combine(
+            queue,
+            observeStats(),
+            pendingIds,
+            observeRecentDecisions(),
+            returningCard,
+        ) { photos, stats, pending, recent, returning ->
             val visible = if (pending.isEmpty()) photos else photos.filterNot { it.id in pending }
             SortUiState(
                 queue = visible.take(MAX_VISIBLE_CARDS).toImmutableList(),
                 remaining = visible.size,
                 total = maxOf(stats.unsorted + stats.kept + stats.trashed, visible.size),
                 isLoading = false,
+                recent = recent.toImmutableList(),
+                returningCard = returning,
             )
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), SortUiState())
 
     fun onEvent(event: SortUiEvent) {
         when (event) {
-            is SortUiEvent.Keep -> decide(event.photo) { keepPhoto(it) }
-            is SortUiEvent.Trash -> decide(event.photo) { trashPhoto(it) }
+            is SortUiEvent.Keep -> decide(event.photo, event.direction) { keepPhoto(it) }
+            is SortUiEvent.Trash -> decide(event.photo, SwipeDirection.LEFT) { trashPhoto(it) }
             SortUiEvent.Undo -> undo()
+            SortUiEvent.ReturnAnimationFinished -> returningCard.value = null
             SortUiEvent.Refresh -> refreshPhotos()
         }
     }
 
-    private fun decide(photo: Photo, write: suspend (Photo) -> Unit) {
+    private fun decide(photo: Photo, direction: SwipeDirection, write: suspend (Photo) -> Unit) {
         pendingIds.update { it + photo.id }
+        if (!direction.isKeep) effectChannel.trySend(SortEffect.TrashedWithUndo)
         viewModelScope.launch {
             writeMutex.withLock {
                 try {
                     write(photo)
+                    swipeHistory.addLast(ReturningCard(photo.id, direction))
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
@@ -100,17 +117,26 @@ class SortViewModel @Inject constructor(
     private fun undo() {
         viewModelScope.launch {
             writeMutex.withLock {
+                // Announce the return before the photo reappears, so the deck can animate it in.
+                val expected = swipeHistory.lastOrNull()
+                returningCard.value = expected
                 try {
                     val restored = undoLastDecision()
-                    if (restored == null) {
-                        effectChannel.send(SortEffect.ShowMessage(R.string.sort_nothing_to_undo))
-                    } else {
-                        pendingIds.update { it - restored.id }
+                    when {
+                        restored == null -> {
+                            returningCard.value = null
+                            effectChannel.send(SortEffect.ShowMessage(R.string.sort_nothing_to_undo))
+                        }
+                        else -> {
+                            if (restored.id == expected?.photoId) swipeHistory.removeLast() else returningCard.value = null
+                            pendingIds.update { it - restored.id }
+                        }
                     }
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
                     Log.w(TAG, "Undo failed", e)
+                    returningCard.value = null
                     effectChannel.send(SortEffect.ShowMessage(R.string.sort_error_undo))
                 }
             }

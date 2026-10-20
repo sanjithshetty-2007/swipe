@@ -37,6 +37,13 @@ object SwipeItMotion {
     /** Tilt of the 2nd and 3rd card in the stack. */
     val StackRotations = floatArrayOf(0f, -4f, 5f)
 
+    /** Alternating tilt of Recent-strip thumbnails. */
+    const val RecentTiltDegrees = 5f
+
+    /** Preview zoom limits. */
+    const val MaxZoom = 5f
+    const val DoubleTapZoom = 2.5f
+
     /** Card springing back to centre after an incomplete swipe. */
     fun <T> cardSnapBack(): SpringSpec<T> =
         spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMediumLow)
