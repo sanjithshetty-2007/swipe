@@ -1,11 +1,14 @@
 package com.swipeit.app.core.permissions
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.os.Build
 
 /** Permission names per API level and the pure state resolution logic. */
 internal object PhotoPermissions {
 
+    // Lint cannot see the sdkInt guard below; the constants are plain strings, safe on any API.
+    @SuppressLint("InlinedApi")
     fun fullAccess(sdkInt: Int = Build.VERSION.SDK_INT): String =
         if (sdkInt >= Build.VERSION_CODES.TIRAMISU) {
             Manifest.permission.READ_MEDIA_IMAGES
@@ -13,6 +16,7 @@ internal object PhotoPermissions {
             Manifest.permission.READ_EXTERNAL_STORAGE
         }
 
+    @SuppressLint("InlinedApi")
     fun partialAccess(sdkInt: Int = Build.VERSION.SDK_INT): String? =
         if (sdkInt >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED

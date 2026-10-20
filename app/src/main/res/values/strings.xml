@@ -15,9 +15,41 @@
     <string name="permission_select_more">Select more</string>
     <string name="permission_allow_all">Allow all</string>
 
-    <string name="home_loading">Looking for photos…</string>
-    <plurals name="home_photos_found">
-        <item quantity="one">%d photo found</item>
-        <item quantity="other">%d photos found</item>
+    <string name="nav_sort">Sort</string>
+    <string name="nav_trash">Trash</string>
+    <string name="nav_kept">Kept</string>
+    <string name="badge_overflow">99+</string>
+
+    <string name="action_back">Back</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_trash">Move to Trash</string>
+    <string name="action_keep">Keep</string>
+    <string name="action_keep_up">Keep and next</string>
+    <string name="action_expand">Open full photo</string>
+
+    <string name="photo_info_subtitle">%1$s · %2$s</string>
+    <plurals name="progress_photos_left">
+        <item quantity="one">%d photo left</item>
+        <item quantity="other">%d photos left</item>
     </plurals>
+    <plurals name="progress_sorted_label">
+        <item quantity="one">%1$d of %2$d sorted</item>
+        <item quantity="other">%1$d of %2$d sorted</item>
+    </plurals>
+
+    <string name="sort_loading">Looking for photos…</string>
+    <string name="sort_empty_title">All sorted!</string>
+    <string name="sort_empty_message">No unsorted photos left. New photos will show up here automatically.</string>
+
+    <string name="trash_title">Trash</string>
+    <string name="trash_placeholder_message">Photos you swipe left will appear here. Nothing is deleted from your phone until you empty the trash.</string>
+
+    <string name="kept_title">Kept</string>
+    <string name="kept_placeholder_message">Photos you swipe right or up will appear here.</string>
+
+    <string name="preview_title">Preview</string>
+    <string name="preview_placeholder_message">Full-screen preview of photo %1$d is coming soon.</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_placeholder_message">Settings are coming soon.</string>
 </resources>

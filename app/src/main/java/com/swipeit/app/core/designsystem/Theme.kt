@@ -7,6 +7,8 @@ import androidx.compose.runtime.Composable
 private val SwipeItDarkColorScheme = darkColorScheme(
     primary = SwipeItColors.Keep,
     onPrimary = SwipeItColors.OnAccent,
+    primaryContainer = SwipeItColors.KeepContainer,
+    onPrimaryContainer = SwipeItColors.Keep,
     secondary = SwipeItColors.Info,
     onSecondary = SwipeItColors.OnAccent,
     error = SwipeItColors.Trash,
@@ -17,7 +19,9 @@ private val SwipeItDarkColorScheme = darkColorScheme(
     onSurface = SwipeItColors.TextPrimary,
     surfaceVariant = SwipeItColors.SurfaceVariant,
     onSurfaceVariant = SwipeItColors.TextSecondary,
+    surfaceContainer = SwipeItColors.Surface,
     outline = SwipeItColors.Outline,
+    outlineVariant = SwipeItColors.Outline,
 )
 
 /** App theme. Dark only for now (CLAUDE.md §7). */
@@ -26,6 +30,7 @@ fun SwipeItTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = SwipeItDarkColorScheme,
         typography = SwipeItTypography,
+        shapes = SwipeItShapes,
         content = content,
     )
 }
