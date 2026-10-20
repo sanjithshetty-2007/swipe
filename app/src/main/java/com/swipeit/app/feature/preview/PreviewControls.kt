@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -25,6 +28,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -146,6 +150,7 @@ fun DecisionChip(decision: Decision?, modifier: Modifier = Modifier) {
 }
 
 private const val CHIP_CONTAINER_ALPHA = 0.15f
+private const val THUMBNAILS_BEFORE_SELECTED = 2
 
 /** "Move to Trash" (coral) and "Keep" (green); the button matching [decision] is filled. */
 @Composable
@@ -220,11 +225,17 @@ fun PreviewThumbnailRow(
     onThumbnailClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
+    // Long lists (trash) scroll; keep the current thumbnail in view as the pager moves.
+    val listState = rememberLazyListState()
+    LaunchedEffect(selectedIndex) {
+        listState.animateScrollToItem((selectedIndex - THUMBNAILS_BEFORE_SELECTED).coerceAtLeast(0))
+    }
+    LazyRow(
+        state = listState,
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(SwipeItDimens.SpacingSmall, Alignment.CenterHorizontally),
     ) {
-        items.forEachIndexed { index, item ->
+        itemsIndexed(items, key = { _, item -> item.photo.id }) { index, item ->
             val isSelected = index == selectedIndex
             val shape = RoundedCornerShape(SwipeItDimens.CornerSmall)
             AsyncImage(

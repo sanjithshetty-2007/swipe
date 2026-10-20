@@ -15,4 +15,5 @@ object SwipeItIcons {
     val Undo = R.drawable.ic_undo
     val Close = R.drawable.ic_close
     val More = R.drawable.ic_more_vert
+    val Check = R.drawable.ic_check
 }

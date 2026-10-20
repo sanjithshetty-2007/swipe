@@ -14,6 +14,7 @@ import com.swipeit.app.core.designsystem.SwipeItMotion
 import com.swipeit.app.feature.kept.KeptScreen
 import com.swipeit.app.feature.preview.PreviewRoute
 import com.swipeit.app.feature.preview.PreviewScreen
+import com.swipeit.app.feature.preview.PreviewSource
 import com.swipeit.app.feature.settings.SettingsScreen
 import com.swipeit.app.feature.sort.SortScreen
 import com.swipeit.app.feature.trash.TrashScreen
@@ -44,7 +45,11 @@ fun SwipeItNavHost(
                 onOpenPreview = { photoId -> navController.navigate(PreviewRoute(photoId)) },
             )
         }
-        composable<TrashRoute> { TrashScreen() }
+        composable<TrashRoute> {
+            TrashScreen(
+                onOpenPreview = { photoId -> navController.navigate(PreviewRoute(photoId, PreviewSource.TRASH)) },
+            )
+        }
         composable<KeptRoute> { KeptScreen() }
         composable<PreviewRoute>(
             enterTransition = {

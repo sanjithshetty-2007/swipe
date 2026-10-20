@@ -50,6 +50,40 @@
 
     <string name="trash_title">Trash</string>
     <string name="trash_placeholder_message">Photos you swipe left will appear here. Nothing is deleted from your phone until you empty the trash.</string>
+    <string name="trash_empty_title">Trash is empty</string>
+    <plurals name="trash_summary">
+        <item quantity="one">%1$d photo · %2$s</item>
+        <item quantity="other">%1$d photos · %2$s</item>
+    </plurals>
+    <plurals name="trash_selected_count">
+        <item quantity="one">%d selected</item>
+        <item quantity="other">%d selected</item>
+    </plurals>
+    <string name="trash_select">Select</string>
+    <string name="trash_cancel_selection">Cancel</string>
+    <string name="trash_restore">Restore</string>
+    <string name="trash_delete">Delete</string>
+    <string name="trash_restore_all">Restore all</string>
+    <string name="trash_delete_all">Delete All from Trash</string>
+    <string name="trash_deleting">Deleting…</string>
+    <string name="trash_freed">Freed %1$s</string>
+    <plurals name="trash_restored">
+        <item quantity="one">%d photo restored to Kept</item>
+        <item quantity="other">%d photos restored to Kept</item>
+    </plurals>
+    <string name="trash_delete_cancelled">Deletion cancelled. Your photos are still in Trash.</string>
+    <string name="trash_delete_failed">Some photos couldn\'t be deleted. They are still in Trash.</string>
+    <string name="trash_restore_failed">Couldn\'t restore. Please try again.</string>
+    <string name="trash_confirm_title">Delete from your phone?</string>
+    <plurals name="trash_confirm_message">
+        <item quantity="one">%d photo will be permanently deleted from this device. This can\'t be undone.</item>
+        <item quantity="other">%d photos will be permanently deleted from this device. This can\'t be undone.</item>
+    </plurals>
+    <string name="trash_confirm_delete">Delete</string>
+    <string name="trash_confirm_cancel">Cancel</string>
+    <string name="trash_selected_cd">Selected</string>
+    <string name="trash_not_selected_cd">Not selected</string>
+    <string name="preview_title_trash">%1$d of %2$d (trash)</string>
 
     <string name="kept_title">Kept</string>
     <string name="kept_placeholder_message">Photos you swipe right or up will appear here.</string>

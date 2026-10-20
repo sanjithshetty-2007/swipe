@@ -7,6 +7,14 @@ import org.junit.Test
 class PhotoPermissionsTest {
 
     @Test
+    fun requestSet_api28_addsLegacyWriteForDeletion() {
+        assertArrayEquals(
+            arrayOf("android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE"),
+            PhotoPermissions.requestSet(sdkInt = 28),
+        )
+    }
+
+    @Test
     fun requestSet_api32_usesReadExternalStorage() {
         assertArrayEquals(
             arrayOf("android.permission.READ_EXTERNAL_STORAGE"),

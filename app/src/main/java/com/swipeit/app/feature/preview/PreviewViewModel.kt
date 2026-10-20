@@ -11,6 +11,7 @@ import com.swipeit.app.domain.usecase.ChangeDecisionUseCase
 import com.swipeit.app.domain.usecase.ObserveAllDecisionsUseCase
 import com.swipeit.app.domain.usecase.ObserveRecentDecisionsUseCase
 import com.swipeit.app.domain.usecase.ObserveSortQueueUseCase
+import com.swipeit.app.domain.usecase.ObserveTrashUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CancellationException
@@ -33,32 +34,36 @@ private const val TAG = "PreviewViewModel"
 private const val STOP_TIMEOUT_MILLIS = 5_000L
 
 /**
- * Opens on [PreviewRoute.photoId]. If the photo is among the recent decisions the pager spans
+ * Opens on [PreviewRoute.photoId]. If the photo is in the [PreviewRoute.source] list (recent or trash) the pager spans
  * them (order frozen at open, so pages never reshuffle when a decision changes); otherwise it
  * shows that single photo, taken from the deck or the kept/trashed sets.
  */
 @HiltViewModel
 class PreviewViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    observeRecentDecisions: ObserveRecentDecisionsUseCase,
-    observeSortQueue: ObserveSortQueueUseCase,
+    private val observeRecentDecisions: ObserveRecentDecisionsUseCase,
+    private val observeTrash: ObserveTrashUseCase,
+    private val observeSortQueue: ObserveSortQueueUseCase,
     private val observeAllDecisions: ObserveAllDecisionsUseCase,
     private val changeDecision: ChangeDecisionUseCase,
 ) : ViewModel() {
 
-    private val photoId = savedStateHandle.toRoute<PreviewRoute>().photoId
+    private val route = savedStateHandle.toRoute<PreviewRoute>()
 
-    private data class Snapshot(val photos: List<Photo>, val initialPage: Int, val isRecent: Boolean)
+    private data class Snapshot(val photos: List<Photo>, val initialPage: Int, val source: PreviewSource?)
 
     private val snapshot: Flow<Snapshot> = flow {
-        val recent = observeRecentDecisions().first()
-        val recentIndex = recent.indexOfFirst { it.photo.id == photoId }
-        if (recentIndex >= 0) {
-            emit(Snapshot(recent.map { it.photo }, recentIndex, isRecent = true))
+        val list = when (route.source) {
+            PreviewSource.RECENT -> observeRecentDecisions().first()
+            PreviewSource.TRASH -> observeTrash().first()
+        }
+        val index = list.indexOfFirst { it.photo.id == route.photoId }
+        if (index >= 0) {
+            emit(Snapshot(list.map { it.photo }, index, route.source))
         } else {
-            val photo = observeSortQueue().first().firstOrNull { it.id == photoId }
-                ?: observeAllDecisions().first()[photoId]?.photo
-            emit(Snapshot(listOfNotNull(photo), initialPage = 0, isRecent = false))
+            val photo = observeSortQueue().first().firstOrNull { it.id == route.photoId }
+                ?: observeAllDecisions().first()[route.photoId]?.photo
+            emit(Snapshot(listOfNotNull(photo), initialPage = 0, source = null))
         }
     }.shareIn(viewModelScope, SharingStarted.Lazily, replay = 1)
 
@@ -72,7 +77,7 @@ class PreviewViewModel @Inject constructor(
                 PreviewUiState(
                     items = snap.photos.map { PreviewItem(it, decisions[it.id]?.decision) }.toImmutableList(),
                     initialPage = snap.initialPage,
-                    isRecent = snap.isRecent,
+                    source = snap.source,
                     isLoading = false,
                 )
             }

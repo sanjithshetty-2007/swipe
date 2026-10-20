@@ -16,8 +16,8 @@ data class PreviewUiState(
     /** Order is frozen when the screen opens; only decisions update live. */
     val items: ImmutableList<PreviewItem> = persistentListOf(),
     val initialPage: Int = 0,
-    /** True when paging across the recent decisions; false for a single photo. */
-    val isRecent: Boolean = false,
+    /** The list being paged (recent or trash), or null for a single photo. */
+    val source: PreviewSource? = null,
     val isLoading: Boolean = true,
 ) {
     val isNotFound: Boolean get() = !isLoading && items.isEmpty()

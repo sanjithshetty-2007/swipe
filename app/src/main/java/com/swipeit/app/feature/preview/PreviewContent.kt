@@ -61,7 +61,7 @@ fun PreviewContent(
             else -> PreviewPager(
                 items = uiState.items,
                 initialPage = uiState.initialPage,
-                isRecent = uiState.isRecent,
+                source = uiState.source,
                 onEvent = onEvent,
                 onCloseClick = onCloseClick,
             )
@@ -74,7 +74,7 @@ fun PreviewContent(
 private fun PreviewPager(
     items: ImmutableList<PreviewItem>,
     initialPage: Int,
-    isRecent: Boolean,
+    source: PreviewSource?,
     onEvent: (PreviewUiEvent) -> Unit,
     onCloseClick: () -> Unit,
 ) {
@@ -88,10 +88,10 @@ private fun PreviewPager(
 
     Column(modifier = Modifier.fillMaxSize()) {
         PreviewTopBar(
-            title = if (isRecent) {
-                stringResource(R.string.preview_title_recent, pagerState.currentPage + 1, items.size)
-            } else {
-                stringResource(R.string.preview_title)
+            title = when (source) {
+                PreviewSource.RECENT -> stringResource(R.string.preview_title_recent, pagerState.currentPage + 1, items.size)
+                PreviewSource.TRASH -> stringResource(R.string.preview_title_trash, pagerState.currentPage + 1, items.size)
+                null -> stringResource(R.string.preview_title)
             },
             canReset = current.decision != null,
             onCloseClick = onCloseClick,
@@ -166,14 +166,16 @@ private fun PreviewContentPreview(uiState: PreviewUiState) {
 @Preview(showSystemUi = true)
 @Composable
 private fun PreviewRecentPreview() {
-    PreviewContentPreview(PreviewUiState(items = previewItems, initialPage = 1, isRecent = true, isLoading = false))
+    PreviewContentPreview(
+        PreviewUiState(items = previewItems, initialPage = 1, source = PreviewSource.RECENT, isLoading = false),
+    )
 }
 
 @Preview(showSystemUi = true)
 @Composable
 private fun PreviewSinglePreview() {
     PreviewContentPreview(
-        PreviewUiState(items = previewItems.takeLast(1).toImmutableList(), isRecent = false, isLoading = false),
+        PreviewUiState(items = previewItems.takeLast(1).toImmutableList(), source = null, isLoading = false),
     )
 }
 

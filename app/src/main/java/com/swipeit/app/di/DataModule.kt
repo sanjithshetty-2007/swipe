@@ -2,7 +2,9 @@ package com.swipeit.app.di
 
 import com.swipeit.app.data.media.MediaSource
 import com.swipeit.app.data.media.MediaStoreMediaSource
+import com.swipeit.app.data.repository.PhotoDeletionRepositoryImpl
 import com.swipeit.app.data.repository.PhotoRepositoryImpl
+import com.swipeit.app.domain.repository.PhotoDeletionRepository
 import com.swipeit.app.domain.repository.PhotoRepository
 import dagger.Binds
 import dagger.Module
@@ -18,4 +20,7 @@ abstract class DataModule {
 
     @Binds
     abstract fun bindMediaSource(impl: MediaStoreMediaSource): MediaSource
+
+    @Binds
+    abstract fun bindPhotoDeletionRepository(impl: PhotoDeletionRepositoryImpl): PhotoDeletionRepository
 }

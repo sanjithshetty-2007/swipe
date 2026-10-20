@@ -24,8 +24,12 @@ internal object PhotoPermissions {
             null
         }
 
+    /** Needed on API 26-28 to delete photos through ContentResolver; same storage dialog as read. */
+    fun legacyWriteAccess(sdkInt: Int = Build.VERSION.SDK_INT): String? =
+        if (sdkInt <= Build.VERSION_CODES.P) Manifest.permission.WRITE_EXTERNAL_STORAGE else null
+
     fun requestSet(sdkInt: Int = Build.VERSION.SDK_INT): Array<String> =
-        listOfNotNull(fullAccess(sdkInt), partialAccess(sdkInt)).toTypedArray()
+        listOfNotNull(fullAccess(sdkInt), partialAccess(sdkInt), legacyWriteAccess(sdkInt)).toTypedArray()
 
     /**
      * Maps raw permission facts to a [PhotoPermissionState].
