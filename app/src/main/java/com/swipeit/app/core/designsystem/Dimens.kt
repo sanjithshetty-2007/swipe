@@ -14,4 +14,7 @@ object SwipeItDimens {
     val ButtonGlowElevation = 18.dp
     val IconBadgeSize = 44.dp
     val IconSize = 22.dp
+    val CardCornerRadius = 24.dp
+    val PreviewCardWidth = 240.dp
+    const val CardAspectRatio = 3f / 4f
 }

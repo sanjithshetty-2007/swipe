@@ -12,7 +12,7 @@ fun SwipeItRoot() {
     val permission = rememberPhotoPermissionState()
     val state = permission.state
     if (state.canReadPhotos) {
-        HomePlaceholder(
+        HomePlaceholderScreen(
             isPartialAccess = state is PhotoPermissionState.Partial,
             onSelectMoreClick = permission::request,
             onAllowAllClick = permission::openAppSettings,

@@ -15,5 +15,9 @@
     <string name="permission_select_more">Select more</string>
     <string name="permission_allow_all">Allow all</string>
 
-    <string name="home_placeholder">Home</string>
+    <string name="home_loading">Looking for photos…</string>
+    <plurals name="home_photos_found">
+        <item quantity="one">%d photo found</item>
+        <item quantity="other">%d photos found</item>
+    </plurals>
 </resources>
